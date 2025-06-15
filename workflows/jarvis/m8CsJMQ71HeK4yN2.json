@@ -1,0 +1,430 @@
+{
+  "active": false,
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Contacts Jarvis": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mail Jarvis": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-05-13T17:40:14.585Z",
+  "id": "m8CsJMQ71HeK4yN2",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Jarvis",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        40
+      ],
+      "id": "51459e50-7909-4ee9-8fc4-72bb565ecf36",
+      "name": "Telegram Trigger",
+      "webhookId": "c4766a59-9198-4108-961d-daaf9da28af6",
+      "notesInFlow": false,
+      "credentials": {
+        "telegramApi": {
+          "id": "T3oOrMS0wg7JFkXy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.text }}",
+        "options": {
+          "systemMessage": "Ты - распределительный ассистент JARVIS.\n\nТвоя основная задача - перенаправлять мои запросы к соответствующим инструментам, не выполняя никаких действий самостоятельно. Всегда заканчивай свои сообщения обращением «Сэр».\n\nЗапросы бывают следующих типов:\n\nЗапросы, связанные с почтой (email):\n\nПримеры: отправка письма, проверка почты, пометка письма как прочитанного или наоборот.\n\nДействие: При получении запроса, связанного с почтой, используй инструмент tool Mail Jarvis. Он позволяет отправить email, прочитать их, удалить.  Передай туда инструкцию о том, что нужно сделать. \n\nЗапросы, связанные с контактами:\n\nПримеры: предоставление информации о человеке (имя, почта, телефон или другие).\n\nДействие: Для таких запросов используй инструмент tool Contacts Jarvis, который позволяет работать с гугл-таблицей в которой есть информация по контактам. Передавай туда что ты хочешь получить о контакте и имя контакта. \n\n\nКомбинированные запросы:\n\nПример: «Отправь сообщение моему другу Алексу.»\n\nДействие: Сначала используй tool Contacts Jarvis для получения контактной информации (например, email), а затем направь запрос в tool Mail Jarvis для отправки сообщения(письма).\n\nТы - первоочередной tools agent, отвечающий за распределение запросов. Никогда не формируй тексты писем, отчёты или резюме самостоятельно, а всегда перенаправляй запросы к нужному инструменту.\nОтвечай всегда на русском. "
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        1660,
+        -40
+      ],
+      "id": "9bc56392-38cb-4a20-90d3-2d7fb34edb75",
+      "name": "AI Agent",
+      "retryOnFail": false,
+      "alwaysOutputData": false,
+      "notesInFlow": false,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2140,
+        60
+      ],
+      "id": "12c43f1e-0eea-4cf6-b827-f0241e559653",
+      "name": "Telegram",
+      "webhookId": "d54515d2-7dd6-4b2e-b9e8-333d6cbe50b6",
+      "credentials": {
+        "telegramApi": {
+          "id": "T3oOrMS0wg7JFkXy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "424062bb-dd41-40ca-87c6-f2e8962f1569"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "текст"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "loose",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "40c9574a-05e6-425c-873d-78667517c156",
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "голос"
+            }
+          ]
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1020,
+        40
+      ],
+      "id": "9461d91e-02a0-427a-b44f-74bc51630a18",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3329141f-ee05-4de6-8cd6-f783dc123c08",
+              "name": "text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "d7bcb76b-3a9c-4727-bdac-acc5377e8421",
+              "name": "=message.chat.id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1320,
+        -180
+      ],
+      "id": "e51d592f-b6ce-4303-bcac-4a9993cf273d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1100,
+        360
+      ],
+      "id": "575ebfaa-fe6c-4676-98cd-8efa90eff694",
+      "name": "Telegram1",
+      "webhookId": "c308b25f-7951-48e2-a277-3e4e5ef5ee30",
+      "credentials": {
+        "telegramApi": {
+          "id": "T3oOrMS0wg7JFkXy",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "For all contacts tasks",
+        "workflowId": {
+          "__rl": true,
+          "value": "NPKotLSAG7FrzfOA",
+          "mode": "list",
+          "cachedResultName": "Contacts Jarvis"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        1880,
+        340
+      ],
+      "id": "9dd4618c-e68c-4118-9c76-6236f7599e2b",
+      "name": "Contacts Jarvis"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1640,
+        320
+      ],
+      "id": "c0fc5ec8-c73d-465f-b649-1f09bf41a388",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        1400,
+        320
+      ],
+      "id": "67bbe6b0-0ad4-44db-bbc9-604ed4bb4229",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2ZzAGALJlImzhNdJ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Call the Mail Jarvis sub-workflow",
+        "workflowId": {
+          "__rl": true,
+          "value": "wwfUgUs7YP0ofpJ6",
+          "mode": "list",
+          "cachedResultName": "Mail Jarvis"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "query": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('query', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "query"
+          ],
+          "schema": [
+            {
+              "id": "query",
+              "displayName": "query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "position": [
+        2060,
+        340
+      ],
+      "id": "998c8725-85d7-456a-b6c3-b5460480cf1f",
+      "name": "Mail Jarvis"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Moscow",
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-06-15T17:08:17.891Z",
+      "updatedAt": "2025-06-15T17:08:25.156Z",
+      "id": "jlLwwDw8ZzueefnL",
+      "name": "jarvis"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-06-15T17:08:39.000Z",
+  "versionId": "a956f1a3-6383-48da-b3f3-19b4f6b1949f"
+}
