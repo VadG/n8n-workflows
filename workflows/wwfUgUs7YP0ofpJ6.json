@@ -1,0 +1,200 @@
+{
+  "active": false,
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Send Message": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Delete Message": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Get Message": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-05-15T05:46:51.120Z",
+  "id": "wwfUgUs7YP0ofpJ6",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Mail Jarvis",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "query"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "9ce94104-977f-4475-aeff-d6e02c58eae4",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.query }}",
+        "options": {
+          "systemMessage": "=Привет, ты мой email ассистент.\n\nЯ буду направлять тебе задачи, с которыми тебе необходимо будет справиться! Для их выполнения используй инструменты tools, которые я предоставлю тебе ниже!\n\nsend a message используй этот tool, когда я прошу тебя отправить сообщение кому либо\n\nget messages используй этот tool, когда я прошу тебя получить сообщения, рассказать о сообщениях на моем email, уточняю статус моего email\n\ndelete message используй этот tool, когда я прошу тебя удалить какое то сообщение. \n Сегодня -  {{ $today }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        220,
+        0
+      ],
+      "id": "cce085c9-427a-4a23-8c12-ec4edfd3db20",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', `the email address we are sending to`, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', `subject`, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        280,
+        220
+      ],
+      "id": "c8e4ab84-5161-461c-bb94-461e8e0555b9",
+      "name": "Gmail Send Message",
+      "webhookId": "eca79f93-e822-4f17-9ced-bbfaf1afce6f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HWIM1BgCxkVFe1Ba",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        460,
+        220
+      ],
+      "id": "3bfdeecf-738e-4654-a61f-aa048cae659d",
+      "name": "Gmail Delete Message",
+      "webhookId": "eca79f93-e822-4f17-9ced-bbfaf1afce6f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HWIM1BgCxkVFe1Ba",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "filters": {
+          "sender": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Sender', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        640,
+        240
+      ],
+      "id": "68149148-3bb7-425f-932c-c73795649068",
+      "name": "Gmail Get Message",
+      "webhookId": "eca79f93-e822-4f17-9ced-bbfaf1afce6f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "HWIM1BgCxkVFe1Ba",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -200,
+        280
+      ],
+      "id": "8b1f0a48-9f4d-44ab-a19c-ea31fadd6334",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2ZzAGALJlImzhNdJ",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [],
+  "triggerCount": 0,
+  "updatedAt": "2025-06-15T16:10:04.000Z",
+  "versionId": "f6adfa30-0f67-4b98-bc41-0d5df1171b1c"
+}
