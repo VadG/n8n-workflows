@@ -1,0 +1,454 @@
+{
+  "active": false,
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AuthYandexTracker",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "UpdateTicketStatus": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AuthYandexTracker": {
+      "main": [
+        [
+          {
+            "node": "TicketInfo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TicketInfo": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GetPage": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AddResultComment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AddTagsToTicket": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ReplyToTicket": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "createdAt": "2025-06-16T15:58:15.771Z",
+  "id": "JH2FTbLHfrV61bSN",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "name": "Yandex Tracker",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "b8020111-57b6-4ef8-9111-9d95af62",
+        "options": {
+          "rawBody": false
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c4954365-25e4-48e0-80cd-c0dd7c9e95e9",
+      "name": "Webhook",
+      "webhookId": "b8020111-57b6-4ef8-9111-9d95af62"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Ответь на следующий тикет: \n```\nticket id: {{ $json.key }}\n{{ $json.summary }}\n{{ $json.description }}\n{{ $json.emailFrom }}\n```\n\nВозможные переходы по статусам(`transitions`):\n```\n{{ JSON.stringify($json.transitions) }}\n```\n\nСначала поразмышляй и обоснуй свой ответ в 3-4 предложениях.\nПосле выполнения всех необходимых действий сделай резюме проделанной работы.",
+        "options": {
+          "systemMessage": "СИСТЕМНЫЙ ПРОМПТ",
+          "maxIterations": 10,
+          "returnIntermediateSteps": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        940,
+        0
+      ],
+      "id": "517d9aba-0c68-42d3-8a02-11e857109e50",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "toolDescription": "Перевести в новый статус тикет",
+        "method": "POST",
+        "url": "=https://api.tracker.yandex.net/v2/issues/{{ $('Webhook').item.json.body.issue.key }}/transitions/{transition_id}/_execute",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "transition_id"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "=Bearer {{ $('AuthYandexTracker').item.json.iamToken }}"
+            },
+            {
+              "name": "X-Org-ID",
+              "valueProvider": "fieldValue",
+              "value": "256073"
+            }
+          ]
+        },
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "transition_id",
+              "description": "id нового статуса(перехода)",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        480
+      ],
+      "id": "84e65230-aee3-409b-9a6a-16f04861437f",
+      "name": "UpdateTicketStatus"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://iam.api.cloud.yandex.net/iam/v1/tokens",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "yandexPassportOauthToken",
+              "value": "---OAUTH TOKEN---"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        220,
+        0
+      ],
+      "id": "63bf71b6-41d7-46ab-a30d-833d42170917",
+      "name": "AuthYandexTracker"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.tracker.yandex.net/v2/issues/{{ $('Webhook').item.json.body.issue.key }}?expand=transitions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $json.iamToken }}"
+            },
+            {
+              "name": "X-Org-ID",
+              "value": "---ORG ID---"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "id": "495e2028-beea-41d4-ac97-0668248a9e74",
+      "name": "TicketInfo"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Загрузить страницу с сайта",
+        "url": "={url}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "url",
+              "description": "Url для загрузки",
+              "type": "string"
+            }
+          ]
+        },
+        "optimizeResponse": true,
+        "responseType": "text",
+        "truncateResponse": true,
+        "maxLength": 5000
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        320
+      ],
+      "id": "c4d77774-d2ee-4146-9f17-67cf5c2508d9",
+      "name": "GetPage"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.tracker.yandex.net/v2/issues/{{ $('Webhook').item.json.body.issue.key }}/comments",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('AuthYandexTracker').item.json.iamToken }}"
+            },
+            {
+              "name": "X-Org-ID",
+              "value": "---ORG ID---"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1580,
+        0
+      ],
+      "id": "a007cceb-e6b9-41b7-ba48-9a711f0394c1",
+      "name": "AddResultComment"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Добавить теги в тикет",
+        "method": "PATCH",
+        "url": "=https://api.tracker.yandex.net/v2/issues/{{ $('Webhook').item.json.body.issue.key }}",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "=Bearer {{ $('AuthYandexTracker').item.json.iamToken }}"
+            },
+            {
+              "name": "X-Org-ID",
+              "valueProvider": "fieldValue",
+              "value": "---ORG ID---"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n            \"tags\": {\n                \"add\": {tags_to_add},\n                \"remove\": []\n            }\n        }",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "tags_to_add",
+              "description": "массив тэгов которые необходимо добавить в тикет",
+              "type": "json"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1080,
+        320
+      ],
+      "id": "a5093ffb-4f79-48c2-b919-7e40a0188ad5",
+      "name": "AddTagsToTicket"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Ответить пользователю",
+        "method": "POST",
+        "url": "=https://api.tracker.yandex.net/v2/issues/{{ $('Webhook').item.json.body.issue.key }}/comments",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "=Bearer {{ $('AuthYandexTracker').item.json.iamToken }}"
+            },
+            {
+              "name": "X-Org-ID",
+              "valueProvider": "fieldValue",
+              "value": "256073"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"text\": \"{text}\",\n    \"email\": {\n        \"subject\": \"тема\",\n        \"text\": \"{text}\",\n        \"info\": {\n            \"from\": \"Служба поддержки \",\n            \"to\": [\n                \"{to_email}\"\n            ]\n        }\n    }\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "to_email",
+              "description": "Адрес электронной почты пользователя",
+              "type": "string"
+            },
+            {
+              "name": "text",
+              "description": "Текст сообщения в одну строку. No special characters!",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        1080,
+        480
+      ],
+      "id": "d33499a9-d0f6-4f24-940d-eab404ad56a8",
+      "name": "ReplyToTicket"
+    },
+    {
+      "parameters": {
+        "model": "meta-llama/llama-4-maverick:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        500,
+        300
+      ],
+      "id": "532c682e-19d8-4fea-b77f-b49a894fbfe4",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "2ZzAGALJlImzhNdJ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## I'm a note \n**Double click** to edit me. [Guide](https://docs.n8n.io/workflows/sticky-notes/)\n\nУстановка N8N\n- Self-hosted версия: Вы можете установить self-hosted версию на свой сервер, используя документацию: https://github.com/n8n-io/self-hosted-ai-starter-kit\n\n- Облачная версия: Вы можете купить облачную версию на официальном сайте (цена от $24): [n8n.io](https://n8n.io/).\n\nИнтеграция Яндекс трекера и N8N: Пошаговый процесс\n1. Создание и настройка шаблона\n\nВ N8N нет готовой интеграции для Яндекс трекера, поэтому вся реализация выполнялась на основе HTTP запросов. Вы можете начать с готового шаблона, который я бесплатно разместил тут:\n\n\ngithub.com\nGitHub - aydar-musin/n8n-yandex-tracker: Шаблон интеграции N8N с Яндекс Трекер\nhttps://github.com/aydar-musin/n8n-yandex-tracker\n\nТам уже реализовано: авторизация, отправка ответов на тикеты, отправка комментариев, управление тэгами тикета. Вам нужно лишь настроить следующие вещи: вебхук, авторизация в API трекере и OpenAI и самое главное - промпт. Вы же уже умеете писать промпты?))))\n\n2. Настройка авторизации\n\nOAuth токен API трекера.\n\n- Получите OAuth доступ к API Трекера\n\nДля доступа вам потребуется:\n\n- OAuth-токен - получите его по инструкции: https://yandex.cloud/ru/docs/iam/operations/iam-token/create)\n\n- Идентификатор организации - получите его, перейдя в Трекере на страницу Администрирование → Организации (https://tracker.yandex.ru/admin/orgs) (поле идентификатор)\n\nИ добавьте токен в N8N в ноду AuthYandexTracker.\n\nА также добавьте идентификатор организации во все HTTP запросы.\n\nN8N + Яндекс трекер = бесплатная автоматизированная обработка 70% тикетов в службе поддержки с помощью ИИ агентов\n3. Настройка вебхука и триггеров\n\nНастройте триггер на стороне Трекера: перейдите в настройки очереди → Автоматизация и нажмите Создать триггер.\n\nНастройте условия, подходящие под ваши задачи. Например, мы не хотим обрабатывать все тикеты с помощью ИИ и мы настроили соответствующие фильтры для триггера.\n\nВ разделе Выполнить действие выберите HTTP запрос. И используйте шаблон запроса:\n\n\n{\n   \"issue\": {\n     \"summary\": \"{{issue.summary}}\",\n     \"description\": \"{{issue.description}}\",\n     \"issue.key\": \"{{issue.key}}\"\n     }\n }\nНе забудьте обновить URL запроса под ваш URL вебхука.\n\nN8N + Яндекс трекер = бесплатная автоматизированная обработка 70% тикетов в службе поддержки с помощью ИИ агентов\n4. Настройка доступа к OpenAI\n\nНастройте промпт и ключ доступа к OpenAI.",
+        "height": 420,
+        "width": 320
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        -620
+      ],
+      "id": "7ba0426a-1b6a-4f75-a1c1-de53095dcdd4",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-06-15T17:45:27.825Z",
+      "updatedAt": "2025-06-15T17:45:27.825Z",
+      "id": "c7vykQBFJv9jJRLX",
+      "name": "tools"
+    }
+  ],
+  "triggerCount": 0,
+  "updatedAt": "2025-06-16T16:00:21.000Z",
+  "versionId": "12dc5320-12db-4387-9f9c-cae39a652db8"
+}
