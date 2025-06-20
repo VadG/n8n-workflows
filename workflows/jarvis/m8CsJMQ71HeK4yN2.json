@@ -106,6 +106,17 @@
           }
         ]
       ]
+    },
+    "Telegram1": {
+      "main": [
+        [
+          {
+            "node": "Telegram2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "createdAt": "2025-05-13T17:40:14.585Z",
@@ -287,7 +298,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        1100,
+        780,
         360
       ],
       "id": "575ebfaa-fe6c-4676-98cd-8efa90eff694",
@@ -482,6 +493,29 @@
       ],
       "id": "087e10d9-62a7-4918-a6a7-6aea2bd7268d",
       "name": "Calendar Jarvis"
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1880,
+        600
+      ],
+      "id": "2d9992bb-d901-41e9-ba3d-13054284c83b",
+      "name": "Telegram2",
+      "webhookId": "d54515d2-7dd6-4b2e-b9e8-333d6cbe50b6",
+      "credentials": {
+        "telegramApi": {
+          "id": "T3oOrMS0wg7JFkXy",
+          "name": "Telegram account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -500,6 +534,6 @@
     }
   ],
   "triggerCount": 1,
-  "updatedAt": "2025-06-20T13:55:34.000Z",
-  "versionId": "44dda09d-4fdd-43f8-aa94-1afcedc9a361"
+  "updatedAt": "2025-06-20T14:44:13.000Z",
+  "versionId": "fe6a741f-1ef4-487c-9af1-0bdb4cb1627e"
 }
